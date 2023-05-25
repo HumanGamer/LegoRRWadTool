@@ -2,10 +2,10 @@
 #include <string.h>
 #include "wad.h"
 
-Bool GetFileName(FILE* f, char* buffer)
+Bool GetFileName(FILE* f, String buffer)
 {
-    char c;
-    while ((c = fgetc(f)))
+    S8 c;
+    while ((c = (S8)fgetc(f)))
     {
         *buffer = c;
         buffer++;
@@ -14,7 +14,7 @@ Bool GetFileName(FILE* f, char* buffer)
     return True;
 }
 
-Wad* Wad_Open(const char* filename)
+Wad* Wad_Open(CString filename)
 {
     S32 i, counter = 0;
     S8 header[4];
@@ -50,8 +50,8 @@ Wad* Wad_Open(const char* filename)
     }
 
     // The names are first
-    wad->wadNames = (char**)malloc(sizeof(char*) * wad->numFiles);
-    wad->fileNames = (char**)malloc(sizeof(char*) * wad->numFiles);
+    wad->wadNames = (String*)malloc(sizeof(String) * wad->numFiles);
+    wad->fileNames = (String*)malloc(sizeof(String) * wad->numFiles);
     if (!wad->wadNames || !wad->fileNames)
     {
         fclose(f);
@@ -62,13 +62,13 @@ Wad* Wad_Open(const char* filename)
         return NULL;
     }
 
-    memset(wad->wadNames, 0, sizeof(char*) * wad->numFiles);
-    memset(wad->fileNames, 0, sizeof(char*) * wad->numFiles);
+    memset(wad->wadNames, 0, sizeof(String) * wad->numFiles);
+    memset(wad->fileNames, 0, sizeof(String) * wad->numFiles);
 
     // Reads the names of the files in the wad and on disk
     while (counter < wad->numFiles)
     {
-        char buffer[4096];
+        U8 buffer[4096];
         if (!GetFileName(f, buffer))
         {
             if (wad->wadNames)
@@ -86,7 +86,7 @@ Wad* Wad_Open(const char* filename)
             fclose(f);
             return Null;
         } else {
-            wad->wadNames[counter] = (char*)malloc(strlen(buffer) + 1);
+            wad->wadNames[counter] = (String)malloc(strlen(buffer) + 1);
             strcpy(wad->wadNames[counter], buffer);
 
             //printf("%s\n", wad->wadNames[counter]);
@@ -99,7 +99,7 @@ Wad* Wad_Open(const char* filename)
 
     while (counter < wad->numFiles)
     {
-        char buffer[4096];
+        U8 buffer[4096];
         if (!GetFileName(f, buffer))
         {
             if (wad->wadNames)
@@ -124,7 +124,7 @@ Wad* Wad_Open(const char* filename)
             fclose(f);
             return Null;
         } else {
-            wad->fileNames[counter] = (char*)malloc(strlen(buffer) + 1);
+            wad->fileNames[counter] = (String)malloc(strlen(buffer) + 1);
             strcpy(wad->fileNames[counter], buffer);
 
             //printf("%s\n", wad->fileNames[counter]);
@@ -197,7 +197,7 @@ void Wad_Close(Wad* wad)
     free(wad);
 }
 
-S32 Wad_IsFileInWad(Wad* wad, const char* filename)
+S32 Wad_IsFileInWad(Wad* wad, CString filename)
 {
     S32 i;
     for (i = 0; i < wad->numFiles; i++)
@@ -209,7 +209,7 @@ S32 Wad_IsFileInWad(Wad* wad, const char* filename)
     return -1;
 }
 
-Bool Wad_FileOpen(Wad* wad, const char* filename, char* data, S32* outSize)
+Bool Wad_FileOpen(Wad* wad, CString filename, U8* data, S32* outSize)
 {
     void* ptr;
     S32 index = Wad_IsFileInWad(wad, filename);
@@ -235,8 +235,7 @@ Bool Wad_FileOpen(Wad* wad, const char* filename, char* data, S32* outSize)
         return False;
     }
 
-
-    // TODO: Compression
+    // TODO: Handle Decompression
 
     *outSize = wad->wadEntries[index].fileLength;
     memcpy(data, ptr, wad->wadEntries[index].fileLength);

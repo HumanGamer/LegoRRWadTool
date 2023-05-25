@@ -11,24 +11,8 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    const char * inputFile = argv[1];
-
-    // Get the input path to use for the output path
-    char* inputPath = strdup(inputFile);
-    char* p = inputPath + strlen(inputPath);
-    while (*p != '\\' && p != inputPath)
-    {
-        p--;
-    }
-    if (p != inputPath)
-    {
-        *p = '\0';
-    }
-    else
-    {
-        *p = '\\';
-        *(p + 1) = '\0';
-    }
+    CString inputFile = argv[1];
+    CString inputPath = Platform_GetFilePath(inputFile, Null);
 
     Wad* wad = Wad_Open(inputFile);
     if (wad == Null)
@@ -38,13 +22,11 @@ int main(int argc, char** argv)
     }
 
     printf("numFiles: %d\n", wad->numFiles);
-    for (int i = 0; i < wad->numFiles; i++)
+    for (S32 i = 0; i < wad->numFiles; i++)
     {
-        //const char* outFilename = wad->wadNames[i];
         printf("wadNames[%d]: %s\n", i, wad->wadNames[i]);
-        S32 size;
-        size = wad->wadEntries[i].fileLength;
-        char* data = (char*)malloc(size);
+        S32 size = wad->wadEntries[i].fileLength;
+        U8* data = (U8*)malloc(size);
         if (!Wad_FileOpen(wad, wad->fileNames[i], data, &size))
         {
             printf("Wad_FileOpen failed for file '%s'\n", wad->wadNames[i]);
@@ -52,26 +34,17 @@ int main(int argc, char** argv)
         }
 
         // prepend the input path to the output filename
-        char* outFilename = (char*)malloc(strlen(inputPath) + strlen(wad->wadNames[i]) + 2);
-        strcpy(outFilename, inputPath);
-        strcat(outFilename, "\\");
-        strcat(outFilename, wad->wadNames[i]);
+        U32 bufSize = strlen(inputPath) + strlen(wad->wadNames[i]) + 2; // both string lengths + 1 for the slash + 1 for the null terminator
+        String outFilename = (String)malloc(bufSize);
+        sprintf_s(outFilename, bufSize, "%s\\%s", inputPath, wad->wadNames[i]);
 
+        //char buffer[1024];
+        //Platform_GetFilePath(buffer, 1024, outFilename);
+        //Platform_CreateDirectories(buffer);
 
-        // Recursively create the directories if they don't exist
-        char* dir = strdup(outFilename);
-        char* p = dir;
-        while (*p)
-        {
-            if (*p == '\\')
-            {
-                *p = '\0';
-                CreateDirectory(dir, Null);
-                *p = '\\';
-            }
-            p++;
-        }
-        free(dir);
+        CString dir = Platform_GetFilePath(outFilename, Null);
+        Platform_CreateDirectories(dir);
+        free((void*)dir);
 
         FILE* outFile = fopen(outFilename, "wb");
         fwrite(data, size, 1, outFile);

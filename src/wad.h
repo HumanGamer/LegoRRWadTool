@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdio.h>
-#include "types.h"
+#include "platform/platform.h"
 
 typedef struct WadEntry
 {
@@ -26,8 +26,8 @@ typedef struct Wad
     S32 numFiles;
 } Wad, *lpWad;
 
-extern Wad* Wad_Open(const char* filename);
+extern Wad* Wad_Open(CString filename);
 extern void Wad_Close(Wad* wad);
 
-extern S32 Wad_IsFileInWad(Wad* wad, const char* filename);
-extern Bool Wad_FileOpen(Wad* wad, const char* filename, char* data, S32* outSize);
+extern S32 Wad_IsFileInWad(Wad* wad, CString filename);
+extern Bool Wad_FileOpen(Wad* wad, CString filename, U8* data, S32* outSize);

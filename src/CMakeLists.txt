@@ -7,10 +7,12 @@ set(MAIN_SRC
     # Sources
     main.c
     wad.c
+    platform/platform.c
 
     # Headers
     wad.h
-    types.h
+    platform/platform.h
+    platform/types.h
 )
 
 add_executable(LegoRRWadTool ${MAIN_SRC})
