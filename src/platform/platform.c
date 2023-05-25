@@ -91,3 +91,18 @@ void Platform_CreateDirectories(CString path)
     }
     free(dir);
 }
+
+void Platform_Free(void* ptr)
+{
+    if (ptr)
+        free(ptr);
+}
+
+void Platform_FreeArray(void* ptr, U32 numElements)
+{
+    if (!ptr)
+        return;
+    for (U32 i = 0; i < numElements; i++)
+        Platform_Free(((void**)ptr)[i]);
+    Platform_Free(ptr);
+}

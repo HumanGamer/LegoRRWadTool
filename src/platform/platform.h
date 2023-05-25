@@ -11,3 +11,7 @@ extern Bool Platform_CreateDirectory(CString path);
 
 /// Recursively creates the directories if they don't exist
 extern void Platform_CreateDirectories(CString path);
+
+extern void Platform_Free(void* ptr);
+extern void Platform_FreeArray(void* ptr, U32 numElements);
+

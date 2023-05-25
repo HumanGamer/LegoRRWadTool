@@ -2,7 +2,7 @@
 #include <string.h>
 #include "wad.h"
 
-Bool GetFileName(FILE* f, String buffer)
+void GetFileName(FILE* f, String buffer)
 {
     S8 c;
     while ((c = (S8)fgetc(f)))
@@ -11,12 +11,10 @@ Bool GetFileName(FILE* f, String buffer)
         buffer++;
     }
     *buffer = 0;
-    return True;
 }
 
 Wad* Wad_Open(CString filename)
 {
-    S32 i, counter = 0;
     S8 header[4];
     FILE* f;
 
@@ -55,10 +53,8 @@ Wad* Wad_Open(CString filename)
     if (!wad->wadNames || !wad->fileNames)
     {
         fclose(f);
-        if (wad->wadNames)
-            free(wad->wadNames);
-        if (wad->fileNames)
-            free(wad->fileNames);
+        Platform_Free(wad->wadNames);
+        Platform_Free(wad->fileNames);
         return NULL;
     }
 
@@ -66,124 +62,41 @@ Wad* Wad_Open(CString filename)
     memset(wad->fileNames, 0, sizeof(String) * wad->numFiles);
 
     // Reads the names of the files in the wad and on disk
-    while (counter < wad->numFiles)
+    for (S32 i = 0; i < wad->numFiles; i++)
     {
-        U8 buffer[4096];
-        if (!GetFileName(f, buffer))
-        {
-            if (wad->wadNames)
-            {
-                for (i = 0; i < wad->numFiles; i++)
-                {
-                    if (wad->wadNames[i])
-                        free(wad->wadNames[i]);
-                }
-                free(wad->wadNames);
-            }
+        char buffer[4096];
+        GetFileName(f, buffer);
 
-            if (wad->fileNames)
-                free(wad->fileNames);
-            fclose(f);
-            return Null;
-        } else {
-            wad->wadNames[counter] = (String)malloc(strlen(buffer) + 1);
-            strcpy(wad->wadNames[counter], buffer);
-
-            //printf("%s\n", wad->wadNames[counter]);
-        }
-
-        counter++;
+        wad->wadNames[i] = (String)malloc(strlen(buffer) + 1);
+        strcpy(wad->wadNames[i], buffer);
     }
 
-    counter = 0;
-
-    while (counter < wad->numFiles)
+    for (S32 i = 0; i < wad->numFiles; i++)
     {
-        U8 buffer[4096];
-        if (!GetFileName(f, buffer))
-        {
-            if (wad->wadNames)
-            {
-                for (i = 0; i < wad->numFiles; i++)
-                {
-                    if (wad->wadNames[i])
-                        free(wad->wadNames[i]);
-                }
-                free(wad->wadNames);
-            }
+        char buffer[4096];
+        GetFileName(f, buffer);
 
-            if (wad->fileNames)
-            {
-                for (i = 0; i < wad->numFiles; i++)
-                {
-                    if (wad->fileNames[i])
-                        free(wad->fileNames[i]);
-                }
-                free(wad->fileNames);
-            }
-            fclose(f);
-            return Null;
-        } else {
-            wad->fileNames[counter] = (String)malloc(strlen(buffer) + 1);
-            strcpy(wad->fileNames[counter], buffer);
-
-            //printf("%s\n", wad->fileNames[counter]);
-        }
-
-        counter++;
+        wad->fileNames[i] = (String)malloc(strlen(buffer) + 1);
+        strcpy(wad->fileNames[i], buffer);
     }
 
     // Now we get the data.  Address of file, compression
     wad->wadEntries = (WadEntry*)malloc(sizeof(WadEntry) * wad->numFiles);
     if (!wad->wadEntries)
     {
-        if (wad->wadNames)
-        {
-            for (i = 0; i < wad->numFiles; i++)
-            {
-                if (wad->wadNames[i])
-                    free(wad->wadNames[i]);
-            }
-            free(wad->wadNames);
-        }
+        Platform_FreeArray(wad->wadNames, wad->numFiles);
+        Platform_FreeArray(wad->fileNames, wad->numFiles);
 
-        if (wad->fileNames)
-        {
-            for (i = 0; i < wad->numFiles; i++)
-            {
-                if (wad->fileNames[i])
-                    free(wad->fileNames[i]);
-            }
-            free(wad->fileNames);
-        }
         fclose(f);
         return Null;
     }
 
     if (fread(wad->wadEntries, 1, sizeof(WadEntry) * wad->numFiles, f) != (S32)(sizeof(WadEntry) * wad->numFiles))
     {
-        if (wad->wadNames)
-        {
-            for (i = 0; i < wad->numFiles; i++)
-            {
-                if (wad->wadNames[i])
-                    free(wad->wadNames[i]);
-            }
-            free(wad->wadNames);
-        }
 
-        if (wad->fileNames)
-        {
-            for (i = 0; i < wad->numFiles; i++)
-            {
-                if (wad->fileNames[i])
-                    free(wad->fileNames[i]);
-            }
-            free(wad->fileNames);
-        }
-
-        if (wad->wadEntries)
-            free(wad->wadEntries);
+        Platform_FreeArray(wad->wadNames, wad->numFiles);
+        Platform_FreeArray(wad->fileNames, wad->numFiles);
+        Platform_Free(wad->wadEntries);
 
         fclose(f);
         return Null;
