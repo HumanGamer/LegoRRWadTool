@@ -28,27 +28,6 @@ CString Platform_GetFilePath(CString file, U32* outLength)
     return dir;
 }
 
-//U32 Platform_GetFilePath(U8* buffer, U32 bufferSize, CString filepath)
-//{
-//    String dir = _strdup(filepath);
-//    for (S32 i = (S32)strlen(dir) - 1; i >= 0; i--)
-//    {
-//        if (dir[i] == '\\' || dir[i] == '/')
-//        {
-//            dir[i] = '\0';
-//            break;
-//        }
-//    }
-//
-//    U32 len = strlen(dir);
-//
-//    strncpy_s(buffer, bufferSize, dir, len);
-//    buffer[len] = '\0';
-//    free(dir);
-//
-//    return len;
-//}
-
 Bool Platform_CreateDirectory(CString path)
 {
 #ifdef _WIN32

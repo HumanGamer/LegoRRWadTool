@@ -38,10 +38,6 @@ int main(int argc, char** argv)
         String outFilename = (String)malloc(bufSize);
         sprintf_s(outFilename, bufSize, "%s\\%s", inputPath, wad->wadNames[i]);
 
-        //char buffer[1024];
-        //Platform_GetFilePath(buffer, 1024, outFilename);
-        //Platform_CreateDirectories(buffer);
-
         CString dir = Platform_GetFilePath(outFilename, Null);
         Platform_CreateDirectories(dir);
         free((void*)dir);
